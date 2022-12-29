@@ -8,30 +8,96 @@ public class ClientLoginView extends JFrame {
   private JTextField usernameField;
   private JPasswordField passwordField;
 
+  private JLabel usernameLabel;
+  private JLabel passwordLabel;
+  private JLabel titleLabel;
+  private JCheckBox showPassword;
   private JButton loginButton;
+  private JButton backButton;
   public ClientLoginView(){
     setVisible(true);
     setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-    setSize(500,500);
-    setLayout(new FlowLayout());
-    usernameField = new JTextField("Username Goes here...",20);
-    passwordField = new JPasswordField("Password goes here...",20);
+    setSize(800,600);
+    setLayout(null);
+    setLocationRelativeTo(null);
+
+    usernameField = new JTextField();
+    passwordField = new JPasswordField();
+    initiateTextFields(usernameField,300,200,300,40);
+    initiateTextFields(passwordField,300,250,300,40);
+
+    titleLabel = new JLabel("Login !");
+    usernameLabel = new JLabel("Username");
+    passwordLabel = new JLabel("Password");
+
+    initiateLabels(usernameLabel,200,200,100,40,16,Font.PLAIN);
+    initiateLabels(passwordLabel,200,250,100,40,16,Font.PLAIN);
+    initiateLabels(titleLabel,370,100,300,40,36,Font.BOLD);
+
+    showPassword = new JCheckBox("Show Password");
+    initiateCheckbox(showPassword);
+    showPassword.addActionListener((ae)->checkBoxListener());
+
     loginButton = new JButton("Login");
-    add(usernameField);
-    add(passwordField);
-    add(loginButton);
-    loginButton.addActionListener((ae)->{
-      String username = usernameField.getText();
-      String password = passwordField.getText();
-      this.client  = new Client(username,password);
-      String loginState = this.client.login(usernameField.getText(),passwordField.getText());
-      if(loginState.equals("Login successful")){
-          JOptionPane.showMessageDialog(this,loginState);
-          new ClientChatGUI(this.client);
-          dispose();
-      }else{
-          JOptionPane.showMessageDialog(this,loginState,"Login Failed",JOptionPane.ERROR_MESSAGE);
-      }
+    initiateButton(loginButton,300,340);
+
+    backButton = new JButton("Back");
+    initiateButton(backButton,10,10);
+
+    loginButton.addActionListener((ae)->loginListener());
+    backButton.addActionListener((ae)->{
+      new ClientWelcomeView();
+      dispose();
     });
+  }
+
+  private void loginListener(){
+    String username = usernameField.getText();
+    String password = passwordField.getText();
+    this.client  = new Client(username,password);
+    String loginState = this.client.login(usernameField.getText(),passwordField.getText());
+    if(loginState.equals("Login successful")){
+      JOptionPane.showMessageDialog(this,loginState);
+      new ClientChatGUI(this.client);
+      dispose();
+    }else{
+      JOptionPane.showMessageDialog(this,loginState,"Login Failed",JOptionPane.ERROR_MESSAGE);
+    }
+  }
+
+  private void checkBoxListener(){
+    if(showPassword.isSelected()){
+      passwordField.setEchoChar((char) 0);
+    }else{
+      passwordField.setEchoChar('*');
+    }
+  }
+
+  private void initiateTextFields(JComponent component,int x,int y,int width,int height){
+    component.setPreferredSize(new Dimension(100,20));
+    component.setBounds(x,y,width,height);
+    this.add(component);
+  }
+
+  private void initiateLabels(JLabel label,int x,int y,int width,int height,int fontSize,int fontStyle){
+    label.setBounds(x,y,width,height);
+    label.setFont(new Font("Roboto",fontStyle,fontSize));
+    label.setForeground(Color.decode("#175676"));
+    this.add(label);
+  }
+
+  private void initiateButton(JButton button,int x,int y){
+    button.setBounds(x,y,100,40);
+    button.setBackground(Color.decode("#CCE6F4"));
+    button.setForeground(Color.decode("#175676"));
+    button.setFont(new Font("Roboto",Font.PLAIN,16));
+    this.add(button);
+  }
+
+  private void initiateCheckbox(JCheckBox checkBox){
+    checkBox.setBounds(300,305,300,20);
+    checkBox.setForeground(Color.decode("#175676"));
+    checkBox.setFont(new Font("Roboto",Font.PLAIN,16));
+    this.add(checkBox);
   }
 }
