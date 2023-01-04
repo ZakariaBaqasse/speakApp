@@ -37,6 +37,7 @@ public class ServerWorker extends Thread{
             UserData data = new UserData(username,password,port,address);
             session.addUser(data);
             loginResponse = "Login successful";
+            notifyFriends(username,"newLoggedFriend");
         }else{
             loginResponse = "Bad credentials ! Could not connect";
         }
@@ -46,6 +47,27 @@ public class ServerWorker extends Thread{
             this.socket.send(loginPacket);
         } catch (IOException e) {
             throw new RuntimeException(e);
+        }
+    }
+
+    private synchronized void handleLogout(String username) {
+        session.removeUserSession(username);
+        notifyFriends(username,"logoutFriend");
+    }
+
+    private void notifyFriends(String username,String state){
+        UserData[] friends = this.session.getOnlineFriends(username);
+        if(friends!=null){
+        String notification = state+","+username;
+        for(UserData user:friends){
+            byte[] buffer = notification.getBytes();
+            DatagramPacket packet = new DatagramPacket(buffer,0,buffer.length,user.getAddress(),user.getPort());
+            try {
+                this.socket.send(packet);
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
+        }
         }
     }
 
@@ -61,13 +83,32 @@ public class ServerWorker extends Thread{
         }
     }
 
-    public void receiveAndTransfer(String message,UserData receiver) {
-        tmp = message.getBytes();
-        DatagramPacket reply = new DatagramPacket(tmp,0,tmp.length,receiver.getAddress(), receiver.getPort());
+    public void receiveAndTransfer(String message,UserData receiver,String sender) {
+        String reply = "newMessage,"+sender+","+message;
+        tmp = reply.getBytes();
+        DatagramPacket replyPacket = new DatagramPacket(tmp,0,tmp.length,receiver.getAddress(), receiver.getPort());
         try {
-            this.socket.send(reply);
+            this.socket.send(replyPacket);
         } catch (IOException e) {
             throw new RuntimeException(e);
+        }
+    }
+
+    public void sendOnlineFriends(UserData[] users){
+        StringBuilder response = new StringBuilder("");
+        if(users == null){
+            response = new StringBuilder("noUsers,");
+        }else{
+        for (UserData user:users){
+            response.append(user.getUsername()).append(",");
+        }
+        byte[] responseBuffer = response.toString().getBytes();
+        DatagramPacket responsePacket = new DatagramPacket(responseBuffer,0,responseBuffer.length,this.packet.getAddress(),this.packet.getPort());
+        try {
+            this.socket.send(responsePacket);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
         }
     }
     public void run(){
@@ -82,8 +123,8 @@ public class ServerWorker extends Thread{
             }
             case "chat":{
                 System.out.println("Chat request received");
-                UserData receiver = session.getUser(data[1]);
-                receiveAndTransfer(data[2],receiver);
+                UserData receiver = session.getUser(data[2]);
+                receiveAndTransfer(data[3],receiver,data[1]);
                 break;
             }
             case "register":{
@@ -91,10 +132,22 @@ public class ServerWorker extends Thread{
                 userRegister(data[1],data[2],this.packet.getPort(),this.packet.getAddress());
                 break;
             }
+            case "getOnFriends":{
+                System.out.println("Getting online Friends");
+                UserData[] friends = this.session.getOnlineFriends(data[1]);
+                sendOnlineFriends(friends);
+                break;
+            }
+            case "logout":{
+                handleLogout(data[1]);
+                break;
+            }
             default:{
                 System.out.println("Command not found");
             }
         }
     }
+
+
 }
 

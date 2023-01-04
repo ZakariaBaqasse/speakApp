@@ -15,11 +15,7 @@ public class ClientLoginView extends JFrame {
   private JButton loginButton;
   private JButton backButton;
   public ClientLoginView(){
-    setVisible(true);
-    setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-    setSize(800,600);
-    setLayout(null);
-    setLocationRelativeTo(null);
+    initialFrameSetup();
 
     usernameField = new JTextField();
     passwordField = new JPasswordField();
@@ -58,7 +54,9 @@ public class ClientLoginView extends JFrame {
     String loginState = this.client.login(usernameField.getText(),passwordField.getText());
     if(loginState.equals("Login successful")){
       JOptionPane.showMessageDialog(this,loginState);
-      new ClientChatGUI(this.client);
+      ClientChatGUI gui = new ClientChatGUI(this.client);
+      String[] friends = client.getLoggedInFriends();
+      gui.displayOnlineFriend(friends);
       dispose();
     }else{
       JOptionPane.showMessageDialog(this,loginState,"Login Failed",JOptionPane.ERROR_MESSAGE);
@@ -99,5 +97,13 @@ public class ClientLoginView extends JFrame {
     checkBox.setForeground(Color.decode("#175676"));
     checkBox.setFont(new Font("Roboto",Font.PLAIN,16));
     this.add(checkBox);
+  }
+
+  private void initialFrameSetup(){
+    setVisible(true);
+    setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+    setSize(800,600);
+    setLayout(null);
+    setLocationRelativeTo(null);
   }
 }

@@ -19,7 +19,19 @@ public class SessionTracker {
         return optional.get();
     }
 
+    public UserData[] getOnlineFriends(String username){
+        UserData[] onlineFriends=null ;
+        if(!users.isEmpty()){
+            onlineFriends =  users.stream().filter((user)->!user.getUsername().equals(username)).toArray(UserData[]::new);
+        }
+        return onlineFriends;
+    }
+
     public List<UserData> getUsers() {
         return users;
+    }
+
+    public void removeUserSession(String username){
+        users.remove(users.stream().filter((user)->user.getUsername().equals(username)).findFirst().get());
     }
 }

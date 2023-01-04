@@ -14,7 +14,7 @@ public class ClientWelcomeView extends JFrame {
     public ClientWelcomeView(){
         setVisible(true);
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        setSize(500,500);
+        setSize(500,600);
         GridBagConstraints panelConstraints = new GridBagConstraints();
         setLayout(new BorderLayout());
         setBackground(Color.white);
@@ -24,11 +24,13 @@ public class ClientWelcomeView extends JFrame {
         welcomePanel = new JPanel(new FlowLayout());
         buttonsPanel = new JPanel(new GridBagLayout());
 
+        logo.setIcon(new ImageIcon(this.getClass().getResource("/logo.png")));
 
         welcome = new JLabel("Welcome To SpeakApp!");
         welcome.setFont(new Font("Roboto",Font.BOLD,36));
         welcome.setForeground(Color.decode("#175676"));
         welcomePanel.add(welcome);
+        welcomePanel.add(logo);
 
         login = new JButton("Login");
         initiateButton(login);

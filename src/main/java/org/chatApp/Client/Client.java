@@ -1,12 +1,8 @@
 package org.chatApp.Client;
 
-import org.chatApp.Server.UserData;
 
-import javax.print.attribute.standard.DateTimeAtCompleted;
-import java.io.BufferedOutputStream;
-import java.io.ByteArrayOutputStream;
 import java.io.IOException;
-import java.io.ObjectOutputStream;
+
 import java.net.*;
 
 public class Client {
@@ -36,6 +32,10 @@ public class Client {
         }
     }
 
+    public String getUsername() {
+        return username;
+    }
+
     public String login(String username, String password){
         String request = "login,"+username+","+password+", EOF";
         String serverResponse;
@@ -51,6 +51,27 @@ public class Client {
             throw new RuntimeException(e);
         }
         return serverResponse;
+    }
+
+    public String[] getLoggedInFriends(){
+        String request = "getOnFriends,"+this.username;
+        String[] onlineFriends;
+        byte[] requestBuffer = request.getBytes();
+        DatagramPacket requestPacket = new DatagramPacket(requestBuffer,0,requestBuffer.length,serverAddress,SERVER_PORT);
+        try {
+            socket.send(requestPacket);
+            byte[] responseBuffer = new byte[3000];
+            DatagramPacket responsePacket = new DatagramPacket(responseBuffer,responseBuffer.length);
+            socket.receive(responsePacket);
+            if(new String(responsePacket.getData()).trim().split(",")[0]=="noUsers"){
+                onlineFriends = null;
+            }else{
+            onlineFriends = new String(responsePacket.getData()).trim().split(",");
+            }
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+        return onlineFriends;
     }
 
     public String registerUser(String username, String password){
@@ -70,21 +91,16 @@ public class Client {
         return serverResponse;
     }
 
-    public void receiveMessages(){
-        byte[] tmp = new byte[1024];
-        DatagramPacket packet = new DatagramPacket(tmp,0,tmp.length);
-        try {
-            this.socket.receive(packet);
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
-        String message = new String(packet.getData());
-        System.out.println("You got a message: "+message.trim());
+    public void receiveMessages(String sender,String message,ClientChatGUI messageFrame){
+        messageFrame.notifyNewMessage(sender,message);
     }
 
-    public void sendMessage(String message){
-        String receiver = username.equals("zakaria") ? "baqasse":"zakaria";
-        String request = "chat,"+receiver+","+message+", ";
+    private void newOnlineFriend(String friend,ClientChatGUI chatGUI) {
+        chatGUI.displayNewFriend(friend);
+    }
+
+    public void sendMessage(String message,String receiver){
+        String request = "chat,"+this.username+","+receiver+","+message+", ";
         byte[] tmp = request.getBytes();
         DatagramPacket packet = new DatagramPacket(tmp,0,tmp.length,serverAddress,SERVER_PORT);
         try {
@@ -94,4 +110,48 @@ public class Client {
             throw new RuntimeException(e);
         }
     }
+    public void receiveResponses(ClientChatGUI chatGUI){
+        byte[] tmp = new byte[1024];
+        DatagramPacket packet = new DatagramPacket(tmp,0,tmp.length);
+        try {
+            this.socket.receive(packet);
+            String[] response = new String(packet.getData()).trim().split(",");
+            String respnseType = response[0];
+            switch (respnseType){
+                case "newMessage":{
+                    receiveMessages(response[1],response[2],chatGUI);
+                    break;
+                }
+                case "newLoggedFriend":{
+                    newOnlineFriend(response[1],chatGUI);
+                    break;
+                }
+                case "logoutFriend":{
+                    loggedOutFriend(response[1],chatGUI);
+                    break;
+                }
+                default:
+                    System.out.println("Unknown request");
+            }
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    private void loggedOutFriend(String friend, ClientChatGUI chatGUI) {
+        chatGUI.removeActiveFriend(friend);
+    }
+
+    public void logout(){
+        String request = "logout,"+this.username;
+        byte[] buffer = request.getBytes();
+        DatagramPacket requsetLogout = new DatagramPacket(buffer,0,buffer.length,serverAddress,SERVER_PORT);
+        try {
+            this.socket.send(requsetLogout);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+
 }
