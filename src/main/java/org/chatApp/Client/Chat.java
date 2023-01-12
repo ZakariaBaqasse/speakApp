@@ -3,6 +3,7 @@ package org.chatApp.Client;
 import javax.swing.*;
 import java.awt.*;
 
+//Class responsable sur l'affichage des messages et de garder l'historique de discussion
 public class Chat {
     private Client client;
     private String receiver;

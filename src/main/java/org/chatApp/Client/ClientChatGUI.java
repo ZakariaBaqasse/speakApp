@@ -5,6 +5,8 @@ import java.awt.*;
 import java.util.Arrays;
 import java.util.LinkedList;
 
+
+//class qui englobe tous le logique de l'interface de chat
 public class ClientChatGUI extends JFrame {
 
     private Client client;

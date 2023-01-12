@@ -8,6 +8,7 @@ import java.net.InetAddress;
 import java.sql.SQLException;
 
 
+// class qui traite les requetes des utilisateurs
 public class ServerWorker extends Thread{
     private DatagramPacket packet;
     private DatagramSocket socket;

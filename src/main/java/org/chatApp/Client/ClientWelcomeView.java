@@ -4,6 +4,8 @@ import javax.swing.*;
 import javax.swing.border.Border;
 import java.awt.*;
 
+
+//class qui affiche l'interface de bienvenue
 public class ClientWelcomeView extends JFrame {
     private JButton login;
     private JButton register;

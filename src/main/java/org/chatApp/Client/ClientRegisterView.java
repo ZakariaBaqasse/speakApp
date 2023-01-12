@@ -3,6 +3,8 @@ package org.chatApp.Client;
 import javax.swing.*;
 import java.awt.*;
 
+
+//class responsable sur le logique d'inscription
 public class ClientRegisterView extends JFrame {
     private JTextField usernameField;
     private JPasswordField passwordField;

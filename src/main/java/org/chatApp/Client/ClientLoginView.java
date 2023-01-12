@@ -3,6 +3,8 @@ package org.chatApp.Client;
 import javax.swing.*;
 import java.awt.*;
 
+
+//class responsable sur le logique du login
 public class ClientLoginView extends JFrame {
   private Client client;
   private JTextField usernameField;

@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
+//class qui gere les sessions des utilisateurs
 public class SessionTracker {
     private List<UserData>users;
     private ServerDB database;

@@ -5,6 +5,8 @@ import java.io.IOException;
 import java.net.*;
 import java.util.List;
 
+
+//class client responsable sur la communication avec le serveur
 public class Client {
     private String username;
     private String password;

@@ -4,6 +4,7 @@ import javax.swing.*;
 import java.awt.*;
 import java.util.List;
 
+//class responsable sur l'affichage de l'interface pour ajouter des amis
 public class ClientAddFriendsView extends JFrame {
     private Client client;
     private JList usersList;

@@ -11,6 +11,7 @@ public class ServerDB {
     private String connectionString;
     private Connection connection;
 
+    //class responsable sur la communication avec la base de donnees
     public ServerDB(String dbUsername, String dbPassword, String connectionString) throws SQLException {
         this.dbUsername = dbUsername;
         this.dbPassword = dbPassword;

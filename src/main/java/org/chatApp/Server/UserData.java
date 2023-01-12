@@ -2,6 +2,7 @@ package org.chatApp.Server;
 
 import java.net.InetAddress;
 
+//class qui regroupe les informations d'un utilisateur
 public class UserData {
     private String username;
     private String password;
