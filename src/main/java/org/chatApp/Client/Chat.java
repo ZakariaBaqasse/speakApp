@@ -46,6 +46,10 @@ public class Chat {
         return viewPanel;
     }
 
+    public void closePanel(JFrame parent){
+        parent.remove(this.viewPanel);
+    }
+
     private void setupMessagePanel(){
         JPanel messagePanel = new JPanel(new FlowLayout());
         JButton sendButton = new JButton("send");
@@ -75,6 +79,8 @@ public class Chat {
         messages.setFont(new Font("Roboto",Font.PLAIN,16));
         messages.setForeground(Color.decode("#175676"));
     }
+
+
 
     public void addMessage(String message){
         messagesModel.add(messagesModel.getSize(),message);

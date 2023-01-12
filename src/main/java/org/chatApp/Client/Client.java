@@ -2,8 +2,8 @@ package org.chatApp.Client;
 
 
 import java.io.IOException;
-
 import java.net.*;
+import java.util.List;
 
 public class Client {
     private String username;
@@ -53,25 +53,16 @@ public class Client {
         return serverResponse;
     }
 
-    public String[] getLoggedInFriends(){
+    public void getLoggedInFriends(){
         String request = "getOnFriends,"+this.username;
-        String[] onlineFriends;
+
         byte[] requestBuffer = request.getBytes();
         DatagramPacket requestPacket = new DatagramPacket(requestBuffer,0,requestBuffer.length,serverAddress,SERVER_PORT);
         try {
             socket.send(requestPacket);
-            byte[] responseBuffer = new byte[3000];
-            DatagramPacket responsePacket = new DatagramPacket(responseBuffer,responseBuffer.length);
-            socket.receive(responsePacket);
-            if(new String(responsePacket.getData()).trim().split(",")[0]=="noUsers"){
-                onlineFriends = null;
-            }else{
-            onlineFriends = new String(responsePacket.getData()).trim().split(",");
-            }
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
-        return onlineFriends;
     }
 
     public String registerUser(String username, String password){
@@ -105,7 +96,6 @@ public class Client {
         DatagramPacket packet = new DatagramPacket(tmp,0,tmp.length,serverAddress,SERVER_PORT);
         try {
             this.socket.send(packet);
-            System.out.println("request sent: "+request);
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
@@ -130,6 +120,13 @@ public class Client {
                     loggedOutFriend(response[1],chatGUI);
                     break;
                 }
+                case "listOfUsers":{
+                    ClientAddFriendsView view = new ClientAddFriendsView(this,response[1].split("/"));
+                    break;
+                }
+                case "onlineFriends":
+                    chatGUI.displayOnlineFriend(response[1].split("/"));
+                    break;
                 default:
                     System.out.println("Unknown request");
             }
@@ -153,5 +150,29 @@ public class Client {
         }
     }
 
+    public void getUsers(){
+        String request = "getUsers,"+this.username;
+        byte[] buffer = request.getBytes();
+        DatagramPacket requestPacket = new DatagramPacket(buffer,0,buffer.length,serverAddress,SERVER_PORT);
+        try {
+            this.socket.send(requestPacket);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    public void addFriends(List<String> listOfFriends){
+        String request = "addFriends,"+this.username+",";
+        for(String friend:listOfFriends){
+            request+=friend+"/";
+        }
+        byte[] buffer = request.getBytes();
+        DatagramPacket packet = new DatagramPacket(buffer,0,buffer.length,serverAddress,SERVER_PORT);
+        try {
+            this.socket.send(packet);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+    }
 
 }

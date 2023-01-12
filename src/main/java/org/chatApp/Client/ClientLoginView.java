@@ -50,16 +50,19 @@ public class ClientLoginView extends JFrame {
   private void loginListener(){
     String username = usernameField.getText();
     String password = passwordField.getText();
+    if(username.equals("")|| password.equals("")){
+      JOptionPane.showMessageDialog(this,"Username and password are required Fields","Login Failed",JOptionPane.ERROR_MESSAGE);
+
+    }else{
     this.client  = new Client(username,password);
     String loginState = this.client.login(usernameField.getText(),passwordField.getText());
     if(loginState.equals("Login successful")){
       JOptionPane.showMessageDialog(this,loginState);
       ClientChatGUI gui = new ClientChatGUI(this.client);
-      String[] friends = client.getLoggedInFriends();
-      gui.displayOnlineFriend(friends);
       dispose();
     }else{
       JOptionPane.showMessageDialog(this,loginState,"Login Failed",JOptionPane.ERROR_MESSAGE);
+    }
     }
   }
 

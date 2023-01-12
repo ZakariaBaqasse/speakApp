@@ -15,8 +15,8 @@ public class ServerMain {
         try {
             DatagramSocket serverSocket = new DatagramSocket(SERVER_PORT);
             System.out.println("Server is waiting on port: "+SERVER_PORT);
-            SessionTracker sessionTracker = new SessionTracker();
             ServerDB database = new ServerDB(DB_USER,DB_PASSWORD,CONNECTION_STRING);
+            SessionTracker sessionTracker = new SessionTracker(database);
             while (true){
                 byte[] requestBuffer = new byte[1024];
                 DatagramPacket packet = new DatagramPacket(requestBuffer,0,requestBuffer.length);

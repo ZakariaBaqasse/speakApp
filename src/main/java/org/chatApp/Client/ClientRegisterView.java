@@ -51,14 +51,18 @@ public class ClientRegisterView extends JFrame {
     }
 
     private void registerListener(){
-        Client client = new Client(usernameField.getText(),passwordField.getText());
-        String registerState = client.registerUser(usernameField.getText(),passwordField.getText());
-        if(registerState.equals("Account created successfuly !")){
-            JOptionPane.showMessageDialog(this,registerState+" Now Login using your credentials");
-            new ClientLoginView();
-            dispose();
+        if(usernameField.getText().equals("")||passwordField.getText().equals("")){
+            JOptionPane.showMessageDialog(this,"Username and Password are required to complete registration","Register Failed",JOptionPane.ERROR_MESSAGE);
         }else{
-            JOptionPane.showMessageDialog(this,registerState,"Register Failed",JOptionPane.ERROR_MESSAGE);
+            Client client = new Client(usernameField.getText(),passwordField.getText());
+            String registerState = client.registerUser(usernameField.getText(),passwordField.getText());
+            if(registerState.equals("Account created successfuly !")){
+                JOptionPane.showMessageDialog(this,registerState+" Now Login using your credentials");
+                new ClientLoginView();
+                dispose();
+            }else{
+                JOptionPane.showMessageDialog(this,registerState,"Register Failed",JOptionPane.ERROR_MESSAGE);
+            }
         }
     }
 

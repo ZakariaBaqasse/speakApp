@@ -2,10 +2,8 @@ package org.chatApp.Client;
 
 import javax.swing.*;
 import java.awt.*;
-import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.LinkedList;
-import java.util.List;
-import java.util.stream.Stream;
 
 public class ClientChatGUI extends JFrame {
 
@@ -18,8 +16,8 @@ public class ClientChatGUI extends JFrame {
 
     private JLabel receiver;
     public ClientChatGUI(Client client){
-        chats = new LinkedList<>();
         this.client = client;
+        chats = new LinkedList<>();
         initialFrameSetup();
         setupFriendsList();
         friendsPanelSetup();
@@ -31,6 +29,7 @@ public class ClientChatGUI extends JFrame {
             }
         });
         displayMessages();
+        this.client.getLoggedInFriends();
     }
 
     private void setupMenu(){
@@ -42,6 +41,9 @@ public class ClientChatGUI extends JFrame {
            this.client.logout();
            new ClientWelcomeView();
            dispose();
+       });
+       addFriends.addActionListener((ae)-> {
+           this.client.getUsers();
        });
        menu.add(addFriends);
        menu.add(logout);
@@ -69,14 +71,22 @@ public class ClientChatGUI extends JFrame {
     }
 
     public void displayNewFriend(String friend) {
-        friendsModel.add(friendsModel.getSize(),friend);
-        Chat chat = new Chat(this.client,friend);
-        chats.add(chat);
+        if(!friendsModel.contains(friend)){
+            friendsModel.add(friendsModel.getSize(),friend);
+            Chat chat = new Chat(this.client,friend);
+            chats.add(chat);
+        }
     }
 
     public void removeActiveFriend(String friend) {
         for (int i = 0;i<friendsModel.getSize();i++){
             if(friendsModel.getElementAt(i).equals(friend)){
+                JOptionPane.showMessageDialog(this,friend+" left the chat !");
+                Chat userChat = chats.stream().filter((chat)->chat.getReceiver().equals(friend)).findFirst().get();
+                if(userChat.isPanelOpen()){
+                    friendsList.clearSelection();
+                    userChat.closePanel(this);
+                }
                 friendsModel.remove(i);
             }
         }
@@ -120,7 +130,8 @@ public class ClientChatGUI extends JFrame {
     }
 
     public void displayOnlineFriend(String[] friendsUsernames){
-        if(friendsUsernames!=null){
+        System.out.println(Arrays.toString(friendsUsernames));
+        if(!friendsUsernames[0].equals("noFriends")){
            for(String username:friendsUsernames){
                friendsModel.add(friendsModel.getSize(),username);
                Chat chat = new Chat(this.client,username);

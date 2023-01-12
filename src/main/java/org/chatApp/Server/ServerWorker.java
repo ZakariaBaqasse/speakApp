@@ -1,15 +1,12 @@
 package org.chatApp.Server;
 
-import java.io.BufferedInputStream;
-import java.io.ByteArrayInputStream;
+
 import java.io.IOException;
-import java.io.ObjectInputStream;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.InetAddress;
-
 import java.sql.SQLException;
-import java.util.List;
+
 
 public class ServerWorker extends Thread{
     private DatagramPacket packet;
@@ -95,12 +92,12 @@ public class ServerWorker extends Thread{
     }
 
     public void sendOnlineFriends(UserData[] users){
-        StringBuilder response = new StringBuilder("");
-        if(users == null){
-            response = new StringBuilder("noUsers,");
+        String response = "onlineFriends,";
+        if(users.length<1){
+            response+="noFriends,";
         }else{
         for (UserData user:users){
-            response.append(user.getUsername()).append(",");
+            response+=user.getUsername()+"/";
         }
         byte[] responseBuffer = response.toString().getBytes();
         DatagramPacket responsePacket = new DatagramPacket(responseBuffer,0,responseBuffer.length,this.packet.getAddress(),this.packet.getPort());
@@ -111,29 +108,43 @@ public class ServerWorker extends Thread{
         }
         }
     }
+    private void handleFriendsAddition(String username, String friends) {
+       if(database.addFriends(username,friends.split("/"))){
+           notifyFriends(username,"newLoggedFriend");
+           UserData[] onlineFriends = this.session.getOnlineFriends(username);
+           sendOnlineFriends(onlineFriends);
+       }
+    }
+    private void getAllUsers(String username) {
+       String users = database.getAllUsers(username);
+       String response = "listOfUsers,"+users;
+       byte[] buffer = response.getBytes();
+       DatagramPacket packet = new DatagramPacket(buffer,0,buffer.length,this.packet.getAddress(),this.packet.getPort());
+        try {
+            this.socket.send(packet);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+    }
     public void run(){
         String clientRequest = new String(this.packet.getData()).trim();
         String[] data = clientRequest.split(",");
         String command = data[0];
         switch (command){
             case "login": {
-                System.out.println("Login request received");
                 userLogin(data[1], data[2], this.packet.getPort(), this.packet.getAddress());
                 break;
             }
             case "chat":{
-                System.out.println("Chat request received");
                 UserData receiver = session.getUser(data[2]);
                 receiveAndTransfer(data[3],receiver,data[1]);
                 break;
             }
             case "register":{
-                System.out.println("Register request received");
                 userRegister(data[1],data[2],this.packet.getPort(),this.packet.getAddress());
                 break;
             }
             case "getOnFriends":{
-                System.out.println("Getting online Friends");
                 UserData[] friends = this.session.getOnlineFriends(data[1]);
                 sendOnlineFriends(friends);
                 break;
@@ -142,12 +153,18 @@ public class ServerWorker extends Thread{
                 handleLogout(data[1]);
                 break;
             }
+            case "addFriends":{
+                handleFriendsAddition(data[1],data[2]);
+                break;
+            }
+            case "getUsers":{
+                getAllUsers(data[1]);
+                break;
+            }
             default:{
                 System.out.println("Command not found");
             }
         }
     }
-
-
 }
 

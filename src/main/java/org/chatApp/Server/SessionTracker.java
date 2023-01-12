@@ -6,7 +6,9 @@ import java.util.Optional;
 
 public class SessionTracker {
     private List<UserData>users;
-    public SessionTracker(){
+    private ServerDB database;
+    public SessionTracker(ServerDB database){
+        this.database = database;
         users = new ArrayList<UserData>();
     }
 
@@ -21,8 +23,9 @@ public class SessionTracker {
 
     public UserData[] getOnlineFriends(String username){
         UserData[] onlineFriends=null ;
+        List<String> friendsList = database.getUserFriends(username);
         if(!users.isEmpty()){
-            onlineFriends =  users.stream().filter((user)->!user.getUsername().equals(username)).toArray(UserData[]::new);
+            onlineFriends = users.stream().filter((user)-> friendsList.contains(user.getUsername())).toArray(UserData[]::new);
         }
         return onlineFriends;
     }
